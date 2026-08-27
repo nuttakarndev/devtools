@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevTools Hub — เครื่องมือสำหรับนักพัฒนา</title>
+<meta name="description" content="เครื่องมือ Base64, Diff, Pretty JSON/YAML, URL Encode/Decode, JWT Decode และ Regex Tester ใช้งานฟรีในเบราว์เซอร์">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">%F0%9F%A7%B0</text></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button id="navToggle" class="icon-btn" aria-label="เปิด/ปิดเมนู" aria-expanded="false">☰</button>
+    <div class="brand">🧰 <span>DevTools Hub</span></div>
+    <div class="spacer"></div>
+    <button id="themeToggle" class="icon-btn" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">🌙</button>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar" aria-label="เมนูเครื่องมือ">
+      <div class="nav-group-label">แปลง / จัดรูปแบบ</div>
+      <a href="#base64" class="nav-item" data-tool="base64"><span class="ico">🔐</span>Base64</a>
+      <a href="#url" class="nav-item" data-tool="url"><span class="ico">🔗</span>URL Encode/Decode</a>
+      <a href="#format" class="nav-item" data-tool="format"><span class="ico">🧹</span>Pretty JSON/YAML</a>
+      <a href="#textutils" class="nav-item" data-tool="textutils"><span class="ico">🔤</span>Case / Text Utils</a>
+
+      <div class="nav-group-label">ตรวจสอบ / ทดสอบ</div>
+      <a href="#diff" class="nav-item" data-tool="diff"><span class="ico">🔀</span>Diff Text/JSON/YAML</a>
+      <a href="#jwt" class="nav-item" data-tool="jwt"><span class="ico">🪪</span>JWT Decode</a>
+      <a href="#hash" class="nav-item" data-tool="hash"><span class="ico">🔒</span>Hash Generator</a>
+      <a href="#regex" class="nav-item" data-tool="regex"><span class="ico">🧪</span>Regex Tester</a>
+
+      <div class="nav-group-label">สร้างข้อมูล</div>
+      <a href="#uuid" class="nav-item" data-tool="uuid"><span class="ico">🆔</span>UUID Generator</a>
+      <a href="#idcard" class="nav-item" data-tool="idcard"><span class="ico">🪪</span>เลขบัตรประชาชน (ทดสอบ)</a>
+      <a href="#timestamp" class="nav-item" data-tool="timestamp"><span class="ico">⏱️</span>Timestamp</a>
+
+      <div class="sidebar-footer">ทำงานฝั่งเบราว์เซอร์ทั้งหมด ไม่มีข้อมูลถูกส่งขึ้นเซิร์ฟเวอร์</div>
+    </nav>
+
+    <main class="content" id="content">
+
+      <!-- BASE64 -->
+      <section id="panel-base64" class="panel" data-panel="base64" hidden>
+        <div class="panel-head">
+          <h1>Base64 Encode / Decode</h1>
+          <p class="hint">แปลงข้อความ (รองรับ UTF-8 / ภาษาไทย) เป็น Base64 และย้อนกลับ แบบเรียลไทม์</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" data-action="b64-encode">Encode →</button>
+          <button class="btn primary" data-action="b64-decode">← Decode</button>
+          <button class="btn" data-action="b64-swap">⇅ สลับ</button>
+          <button class="btn ghost" data-action="b64-clear">ล้างทั้งหมด</button>
+          <label class="checkbox"><input type="checkbox" id="b64-urlsafe"> URL-safe (-_ แทน +/)</label>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="b64-text">ข้อความ (Text)</label><button class="copy-btn" data-copy="#b64-text">คัดลอก</button></div>
+            <textarea id="b64-text" spellcheck="false" placeholder="พิมพ์หรือวางข้อความที่นี่..."></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="b64-encoded">Base64</label><button class="copy-btn" data-copy="#b64-encoded">คัดลอก</button></div>
+            <textarea id="b64-encoded" spellcheck="false" placeholder="พิมพ์หรือวาง Base64 ที่นี่..."></textarea>
+          </div>
+        </div>
+        <div class="error" id="b64-error"></div>
+      </section>
+
+      <!-- DIFF -->
+      <section id="panel-diff" class="panel" data-panel="diff" hidden>
+        <div class="panel-head">
+          <h1>Diff — เปรียบเทียบ Text / JSON / YAML</h1>
+          <p class="hint">เปรียบเทียบสองฝั่งแบบเรียลไทม์ พร้อมไฮไลต์ส่วนที่เพิ่ม/ลบ</p>
+        </div>
+        <div class="toolbar">
+          <div class="segmented" id="diff-mode">
+            <button class="seg-btn active" data-mode="text">Text</button>
+            <button class="seg-btn" data-mode="json">JSON</button>
+            <button class="seg-btn" data-mode="yaml">YAML</button>
+          </div>
+          <div class="segmented" id="diff-granularity">
+            <button class="seg-btn active" data-gran="line">บรรทัด</button>
+            <button class="seg-btn" data-gran="word">คำ</button>
+            <button class="seg-btn" data-gran="char">ตัวอักษร</button>
+          </div>
+          <label class="checkbox"><input type="checkbox" id="diff-sortkeys"> เรียง key (JSON/YAML)</label>
+          <button class="btn ghost" data-action="diff-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="diff-a">ต้นฉบับ (A)</label></div>
+            <textarea id="diff-a" spellcheck="false" placeholder="วางข้อความ A..."></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="diff-b">แก้ไข (B)</label></div>
+            <textarea id="diff-b" spellcheck="false" placeholder="วางข้อความ B..."></textarea>
+          </div>
+        </div>
+        <div class="error" id="diff-error"></div>
+        <div class="diff-stats" id="diff-stats"></div>
+        <pre class="diff-output" id="diff-output"></pre>
+      </section>
+
+      <!-- FORMAT -->
+      <section id="panel-format" class="panel" data-panel="format" hidden>
+        <div class="panel-head">
+          <h1>Pretty / Minify JSON &amp; YAML</h1>
+          <p class="hint">จัดรูปแบบ ย่อขนาด และแปลงสลับ JSON ↔ YAML</p>
+        </div>
+        <div class="toolbar">
+          <div class="segmented" id="format-mode">
+            <button class="seg-btn active" data-fmt="json">JSON</button>
+            <button class="seg-btn" data-fmt="yaml">YAML</button>
+          </div>
+          <label class="select-label">ย่อหน้า
+            <select id="format-indent">
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="tab">Tab</option>
+            </select>
+          </label>
+          <label class="checkbox"><input type="checkbox" id="format-sortkeys"> เรียง key</label>
+          <button class="btn primary" data-action="format-pretty">จัดรูปแบบ</button>
+          <button class="btn" data-action="format-minify">ย่อ (Minify)</button>
+          <button class="btn" data-action="format-tojson">→ JSON</button>
+          <button class="btn" data-action="format-toyaml">→ YAML</button>
+          <button class="btn ghost" data-action="format-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="format-input">Input</label><button class="copy-btn" data-copy="#format-input">คัดลอก</button></div>
+            <textarea id="format-input" spellcheck="false" placeholder='{"hello":"world"}'></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="format-output">Output</label><button class="copy-btn" data-copy="#format-output">คัดลอก</button></div>
+            <textarea id="format-output" spellcheck="false" readonly placeholder="ผลลัพธ์จะแสดงที่นี่..."></textarea>
+          </div>
+        </div>
+        <div class="error" id="format-error"></div>
+      </section>
+
+      <!-- TEXT / CASE UTILS -->
+      <section id="panel-textutils" class="panel" data-panel="textutils" hidden>
+        <div class="panel-head">
+          <h1>Case Converter / Text Utilities</h1>
+          <p class="hint">แปลงรูปแบบตัวอักษรสำหรับตั้งชื่อตัวแปร และจัดการบรรทัดข้อความ</p>
+        </div>
+        <div class="toolbar">
+          <label class="select-label">รูปแบบ
+            <select id="tu-case">
+              <option value="camel">camelCase</option>
+              <option value="pascal">PascalCase</option>
+              <option value="snake">snake_case</option>
+              <option value="kebab">kebab-case</option>
+              <option value="constant">CONSTANT_CASE</option>
+              <option value="title">Title Case</option>
+              <option value="sentence">Sentence case</option>
+              <option value="lower">lowercase</option>
+              <option value="upper">UPPERCASE</option>
+            </select>
+          </label>
+          <button class="btn primary" data-action="tu-apply-case">แปลง</button>
+          <button class="btn ghost" data-action="tu-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="toolbar">
+          <button class="btn" data-action="tu-trim">ตัดช่องว่างแต่ละบรรทัด</button>
+          <button class="btn" data-action="tu-remove-empty">ลบบรรทัดว่าง</button>
+          <button class="btn" data-action="tu-dedupe">ลบบรรทัดซ้ำ</button>
+          <button class="btn" data-action="tu-sort-asc">เรียง A→Z</button>
+          <button class="btn" data-action="tu-sort-desc">เรียง Z→A</button>
+          <button class="btn" data-action="tu-reverse-lines">กลับลำดับบรรทัด</button>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="tu-input">Input</label><button class="copy-btn" data-copy="#tu-input">คัดลอก</button></div>
+            <textarea id="tu-input" spellcheck="false" placeholder="พิมพ์หรือวางข้อความที่นี่..."></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="tu-output">Output</label><button class="copy-btn" data-copy="#tu-output">คัดลอก</button></div>
+            <textarea id="tu-output" spellcheck="false" readonly placeholder="ผลลัพธ์จะแสดงที่นี่..."></textarea>
+          </div>
+        </div>
+        <div class="diff-stats" id="tu-stats"></div>
+      </section>
+
+      <!-- URL -->
+      <section id="panel-url" class="panel" data-panel="url" hidden>
+        <div class="panel-head">
+          <h1>URL Encode / Decode</h1>
+          <p class="hint">เข้ารหัส/ถอดรหัส URL แบบเรียลไทม์ และแยกพารามิเตอร์ query string</p>
+        </div>
+        <div class="toolbar">
+          <div class="segmented" id="url-mode">
+            <button class="seg-btn active" data-umode="component">Component</button>
+            <button class="seg-btn" data-umode="full">Full URI</button>
+          </div>
+          <button class="btn primary" data-action="url-encode">Encode →</button>
+          <button class="btn primary" data-action="url-decode">← Decode</button>
+          <button class="btn" data-action="url-swap">⇅ สลับ</button>
+          <button class="btn ghost" data-action="url-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="url-text">ข้อความ / URL</label><button class="copy-btn" data-copy="#url-text">คัดลอก</button></div>
+            <textarea id="url-text" spellcheck="false" placeholder="https://example.com/ค้นหา?q=สวัสดี โลก"></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="url-encoded">Encoded</label><button class="copy-btn" data-copy="#url-encoded">คัดลอก</button></div>
+            <textarea id="url-encoded" spellcheck="false" placeholder="ผลลัพธ์..."></textarea>
+          </div>
+        </div>
+        <div class="error" id="url-error"></div>
+        <div class="field">
+          <div class="field-head"><label>พารามิเตอร์ที่แยกได้ (Query Params)</label></div>
+          <div class="table-wrap"><table class="kv-table" id="url-params"><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- JWT -->
+      <section id="panel-jwt" class="panel" data-panel="jwt" hidden>
+        <div class="panel-head">
+          <h1>JWT Decode / Verify</h1>
+          <p class="hint">ถอดรหัส JSON Web Token ดู Header/Payload อ่านวันหมดอายุ และตรวจสอบลายเซ็น HS256 — ทำงานฝั่งเบราว์เซอร์ทั้งหมด ไม่มีการส่ง token ออกไปไหน</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="jwt-input">JWT Token</label><button class="copy-btn" data-copy="#jwt-input">คัดลอก</button></div>
+          <textarea id="jwt-input" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+        </div>
+        <div class="error" id="jwt-error"></div>
+        <div class="jwt-badges" id="jwt-badges"></div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="jwt-header">Header</label><button class="copy-btn" data-copy="#jwt-header">คัดลอก</button></div>
+            <textarea id="jwt-header" spellcheck="false" readonly placeholder="{ }"></textarea>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="jwt-payload">Payload</label><button class="copy-btn" data-copy="#jwt-payload">คัดลอก</button></div>
+            <textarea id="jwt-payload" spellcheck="false" readonly placeholder="{ }"></textarea>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input id="jwt-secret" type="text" placeholder="ใส่ secret เพื่อตรวจสอบลายเซ็น (รองรับ HS256)">
+          <button class="btn primary" data-action="jwt-verify">ตรวจสอบลายเซ็น</button>
+          <button class="btn ghost" data-action="jwt-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="jwt-verify-result" id="jwt-verify-result"></div>
+      </section>
+
+      <!-- HASH -->
+      <section id="panel-hash" class="panel" data-panel="hash" hidden>
+        <div class="panel-head">
+          <h1>Hash Generator</h1>
+          <p class="hint">คำนวณ SHA-1 / SHA-256 / SHA-384 / SHA-512 จากข้อความหรือไฟล์ ด้วย Web Crypto API ของเบราว์เซอร์</p>
+        </div>
+        <div class="toolbar">
+          <div class="segmented" id="hash-mode">
+            <button class="seg-btn active" data-hmode="text">ข้อความ</button>
+            <button class="seg-btn" data-hmode="file">ไฟล์</button>
+          </div>
+        </div>
+        <div class="field" id="hash-text-wrap">
+          <div class="field-head"><label for="hash-input">ข้อความ</label></div>
+          <textarea id="hash-input" spellcheck="false" placeholder="พิมพ์หรือวางข้อความที่นี่..."></textarea>
+        </div>
+        <div class="field" id="hash-file-wrap" hidden>
+          <div class="field-head"><label for="hash-file">เลือกไฟล์</label></div>
+          <input type="file" id="hash-file">
+          <div class="hint" id="hash-file-info"></div>
+        </div>
+        <div class="error" id="hash-error"></div>
+        <div class="hash-results" id="hash-results">
+          <div class="hash-row"><label>SHA-1</label><input type="text" id="hash-sha1" readonly><button class="copy-btn" data-copy="#hash-sha1">คัดลอก</button></div>
+          <div class="hash-row"><label>SHA-256</label><input type="text" id="hash-sha256" readonly><button class="copy-btn" data-copy="#hash-sha256">คัดลอก</button></div>
+          <div class="hash-row"><label>SHA-384</label><input type="text" id="hash-sha384" readonly><button class="copy-btn" data-copy="#hash-sha384">คัดลอก</button></div>
+          <div class="hash-row"><label>SHA-512</label><input type="text" id="hash-sha512" readonly><button class="copy-btn" data-copy="#hash-sha512">คัดลอก</button></div>
+        </div>
+      </section>
+
+      <!-- REGEX -->
+      <section id="panel-regex" class="panel" data-panel="regex" hidden>
+        <div class="panel-head">
+          <h1>Regex Tester / Generator</h1>
+          <p class="hint">ทดสอบ regex แบบเรียลไทม์ พร้อมไฮไลต์ผลลัพธ์ กลุ่ม (groups) และตัวอย่างการแทนที่</p>
+        </div>
+        <div class="toolbar toolbar-wrap">
+          <div class="regex-input-wrap">
+            <span class="slash">/</span>
+            <input id="regex-pattern" type="text" placeholder="pattern เช่น ^\d+$" autocomplete="off" spellcheck="false">
+            <span class="slash">/</span>
+            <input id="regex-flags" type="text" value="g" maxlength="6" autocomplete="off" spellcheck="false" title="flags">
+          </div>
+          <div class="flag-toggles" id="flag-toggles">
+            <button type="button" class="flag-btn active" data-flag="g" title="global">g</button>
+            <button type="button" class="flag-btn" data-flag="i" title="ignore case">i</button>
+            <button type="button" class="flag-btn" data-flag="m" title="multiline">m</button>
+            <button type="button" class="flag-btn" data-flag="s" title="dotAll">s</button>
+            <button type="button" class="flag-btn" data-flag="u" title="unicode">u</button>
+            <button type="button" class="flag-btn" data-flag="y" title="sticky">y</button>
+          </div>
+          <select id="regex-presets" class="select-label">
+            <option value="">— เลือกแพทเทิร์นสำเร็จรูป —</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="regex-test">ข้อความทดสอบ</label></div>
+          <textarea id="regex-test" spellcheck="false" placeholder="วางข้อความที่ต้องการทดสอบที่นี่..."></textarea>
+        </div>
+        <div class="error" id="regex-error"></div>
+        <div class="field">
+          <div class="field-head"><label>ไฮไลต์ผลลัพธ์</label></div>
+          <div class="regex-highlight" id="regex-highlight"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label>รายการที่ตรงกัน (<span id="regex-count">0</span>)</label></div>
+            <div class="matches-list" id="regex-matches"></div>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="regex-replace">แทนที่ด้วย (Replace) → ดูตัวอย่างผลลัพธ์</label></div>
+            <input id="regex-replace" type="text" placeholder="เช่น $1-$2 หรือข้อความปกติ">
+            <textarea id="regex-replace-output" spellcheck="false" readonly placeholder="ผลลัพธ์หลังแทนที่..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- UUID -->
+      <section id="panel-uuid" class="panel" data-panel="uuid" hidden>
+        <div class="panel-head">
+          <h1>UUID Generator</h1>
+          <p class="hint">สุ่ม UUID v4 ด้วย Web Crypto API สร้างได้ครั้งละหลายรายการ</p>
+        </div>
+        <div class="toolbar">
+          <label class="select-label">จำนวน
+            <input id="uuid-count" type="number" min="1" max="200" value="1" style="width:5rem;">
+          </label>
+          <label class="checkbox"><input type="checkbox" id="uuid-upper"> ตัวพิมพ์ใหญ่</label>
+          <label class="checkbox"><input type="checkbox" id="uuid-nohyphen"> ไม่มีขีด (-)</label>
+          <button class="btn primary" data-action="uuid-generate">สร้าง UUID</button>
+          <button class="btn ghost" data-action="uuid-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="uuid-output">ผลลัพธ์</label><button class="copy-btn" data-copy="#uuid-output">คัดลอกทั้งหมด</button></div>
+          <textarea id="uuid-output" spellcheck="false" readonly></textarea>
+        </div>
+      </section>
+
+      <!-- ID CARD -->
+      <section id="panel-idcard" class="panel" data-panel="idcard" hidden>
+        <div class="panel-head">
+          <h1>เลขบัตรประชาชนไทย — Generator / Validator</h1>
+          <p class="hint">สุ่มเลขบัตรประชาชน 13 หลักที่มี check digit ถูกต้องตามสูตรของกรมการปกครอง สำหรับใช้ทดสอบฟอร์ม/ระบบเท่านั้น ⚠️ เป็นเลขสุ่มล้วนๆ ไม่ใช่เลขของบุคคลจริง</p>
+        </div>
+        <div class="toolbar">
+          <label class="select-label">จำนวน
+            <input id="idc-count" type="number" min="1" max="100" value="5" style="width:5rem;">
+          </label>
+          <label class="checkbox"><input type="checkbox" id="idc-dash" checked> ใส่ขีด (-)</label>
+          <button class="btn primary" data-action="idc-generate">สุ่มสร้าง</button>
+          <button class="btn ghost" data-action="idc-clear">ล้างทั้งหมด</button>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="idc-output">ผลลัพธ์</label><button class="copy-btn" data-copy="#idc-output">คัดลอกทั้งหมด</button></div>
+          <textarea id="idc-output" spellcheck="false" readonly></textarea>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="idc-validate">ตรวจสอบเลขบัตรประชาชน</label></div>
+          <input id="idc-validate" type="text" spellcheck="false" placeholder="วางเลข 13 หลัก มีขีดหรือไม่มีก็ได้ เช่น 1-2345-67890-12-5">
+        </div>
+        <div class="jwt-verify-result" id="idc-validate-result"></div>
+      </section>
+
+      <!-- TIMESTAMP -->
+      <section id="panel-timestamp" class="panel" data-panel="timestamp" hidden>
+        <div class="panel-head">
+          <h1>Timestamp Converter</h1>
+          <p class="hint">แปลง Unix Timestamp ↔ วันที่-เวลา แบบเรียลไทม์</p>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="field-head"><label for="ts-unix">Unix Timestamp → วันที่</label></div>
+            <div class="toolbar" style="margin-bottom:.5rem;">
+              <input id="ts-unix" type="text" spellcheck="false" placeholder="วินาที หรือ มิลลิวินาที เช่น 1735300000" style="flex:1;min-width:200px;">
+              <button class="btn" data-action="ts-now">ตอนนี้ (Now)</button>
+            </div>
+            <div class="error" id="ts-error"></div>
+            <div class="hash-results" id="ts-result"></div>
+          </div>
+          <div class="field">
+            <div class="field-head"><label for="ts-datetime">วันที่ → Unix Timestamp</label></div>
+            <input id="ts-datetime" type="datetime-local" style="margin-bottom:.5rem;">
+            <div class="hash-results" id="ts-unix-result"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/diff@5.2.0/dist/diff.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/tools/base64.js"></script>
+<script src="assets/js/tools/format.js"></script>
+<script src="assets/js/tools/diff.js"></script>
+<script src="assets/js/tools/urlcodec.js"></script>
+<script src="assets/js/tools/jwt.js"></script>
+<script src="assets/js/tools/hash.js"></script>
+<script src="assets/js/tools/regex.js"></script>
+<script src="assets/js/tools/textutils.js"></script>
+<script src="assets/js/tools/uuid.js"></script>
+<script src="assets/js/tools/idcard.js"></script>
+<script src="assets/js/tools/timestamp.js"></script>
+</body>
+</html>
