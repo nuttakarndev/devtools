@@ -52,20 +52,17 @@
     }
   }
 
-  panel.querySelector('[data-action="b64-encode"]').addEventListener("click", encode);
-  panel.querySelector('[data-action="b64-decode"]').addEventListener("click", decode);
-  panel.querySelector('[data-action="b64-swap"]').addEventListener("click", function () {
-    var t = textEl.value;
-    textEl.value = encEl.value;
-    encEl.value = t;
-  });
   panel.querySelector('[data-action="b64-clear"]').addEventListener("click", function () {
     textEl.value = "";
     encEl.value = "";
     showError("");
   });
 
+  /* Both fields are live: typing in either one updates the other. Setting
+     .value programmatically does not fire an "input" event, so this can't
+     loop back on itself. */
   textEl.addEventListener("input", encode);
+  encEl.addEventListener("input", decode);
   urlSafe.addEventListener("change", function () {
     if (textEl.value) encode();
     else if (encEl.value) decode();

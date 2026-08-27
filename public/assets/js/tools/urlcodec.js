@@ -10,9 +10,14 @@
   var errEl = $("url-error");
   var modeWrap = $("url-mode");
   var paramsBody = $("url-params").querySelector("tbody");
+  var jsonEl = $("url-json");
+  var jsonInputEl = $("url-json-input");
+  var jsonOutputEl = $("url-json-output");
+  var jsonErrEl = $("url-json-error");
   var mode = "component";
 
   var showError = window.DT.bindError(errEl);
+  var showJsonError = window.DT.bindError(jsonErrEl);
   var escapeHtml = window.DT.escapeHtml;
 
   function parseParams(text) {
@@ -38,15 +43,61 @@
     return rows;
   }
 
+  /* Rows -> plain object; a repeated key collects into an array instead of
+     silently overwriting the earlier value. */
+  function rowsToObject(rows) {
+    var obj = {};
+    rows.forEach(function (r) {
+      var k = r[0], v = r[1];
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        if (Array.isArray(obj[k])) obj[k].push(v);
+        else obj[k] = [obj[k], v];
+      } else {
+        obj[k] = v;
+      }
+    });
+    return obj;
+  }
+
   function renderParams() {
     var rows = parseParams(textEl.value);
     if (!rows.length) {
       paramsBody.innerHTML = '<tr><td class="empty" colspan="2">ไม่พบพารามิเตอร์ในข้อความ</td></tr>';
+      jsonEl.value = "{}";
       return;
     }
     paramsBody.innerHTML = rows.map(function (r) {
       return "<tr><td>" + escapeHtml(r[0]) + "</td><td>" + escapeHtml(r[1]) + "</td></tr>";
     }).join("");
+    jsonEl.value = JSON.stringify(rowsToObject(rows), null, 2);
+  }
+
+  function jsonToQuery() {
+    showJsonError("");
+    var text = jsonInputEl.value.trim();
+    if (!text) { jsonOutputEl.value = ""; return; }
+    var obj;
+    try {
+      obj = JSON.parse(text);
+    } catch (e) {
+      jsonOutputEl.value = "";
+      showJsonError("JSON ไม่ถูกต้อง: " + e.message);
+      return;
+    }
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
+      jsonOutputEl.value = "";
+      showJsonError("ต้องเป็น JSON object เช่น {\"key\":\"value\"} เท่านั้น");
+      return;
+    }
+    var params = new URLSearchParams();
+    Object.keys(obj).forEach(function (k) {
+      var v = obj[k];
+      var values = Array.isArray(v) ? v : [v];
+      values.forEach(function (item) {
+        params.append(k, item === null || item === undefined ? "" : String(item));
+      });
+    });
+    jsonOutputEl.value = params.toString();
   }
 
   function encode() {
@@ -79,21 +130,27 @@
     });
   });
 
-  panel.querySelector('[data-action="url-encode"]').addEventListener("click", encode);
-  panel.querySelector('[data-action="url-decode"]').addEventListener("click", decode);
-  panel.querySelector('[data-action="url-swap"]').addEventListener("click", function () {
-    var t = textEl.value;
-    textEl.value = encEl.value;
-    encEl.value = t;
-    renderParams();
-  });
   panel.querySelector('[data-action="url-clear"]').addEventListener("click", function () {
     textEl.value = "";
     encEl.value = "";
+    jsonInputEl.value = "";
+    jsonOutputEl.value = "";
     showError("");
+    showJsonError("");
     renderParams();
   });
 
+  /* Both fields are live: typing in either one updates the other. Setting
+     .value programmatically does not fire an "input" event, so this can't
+     loop back on itself. */
   textEl.addEventListener("input", encode);
+  encEl.addEventListener("input", decode);
+
+  var jsonDebounce = null;
+  jsonInputEl.addEventListener("input", function () {
+    clearTimeout(jsonDebounce);
+    jsonDebounce = setTimeout(jsonToQuery, 200);
+  });
+
   renderParams();
 })();

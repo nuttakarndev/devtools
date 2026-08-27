@@ -81,14 +81,11 @@
       <section id="panel-base64" class="panel" data-panel="base64" hidden>
         <div class="panel-head">
           <h1>Base64 Encode / Decode</h1>
-          <p class="hint">แปลงข้อความ (รองรับ UTF-8 / ภาษาไทย) เป็น Base64 และย้อนกลับ แบบเรียลไทม์</p>
+          <p class="hint">พิมพ์หรือวางฝั่งใดฝั่งหนึ่ง อีกฝั่งจะแปลงให้อัตโนมัติ (รองรับ UTF-8 / ภาษาไทย)</p>
         </div>
         <div class="toolbar">
-          <button class="btn primary" data-action="b64-encode">Encode →</button>
-          <button class="btn primary" data-action="b64-decode">← Decode</button>
-          <button class="btn" data-action="b64-swap">⇅ สลับ</button>
-          <button class="btn ghost" data-action="b64-clear">ล้างทั้งหมด</button>
           <label class="checkbox"><input type="checkbox" id="b64-urlsafe"> URL-safe (-_ แทน +/)</label>
+          <button class="btn ghost" data-action="b64-clear">ล้างทั้งหมด</button>
         </div>
         <div class="grid-2">
           <div class="field">
@@ -237,16 +234,13 @@
       <section id="panel-url" class="panel" data-panel="url" hidden>
         <div class="panel-head">
           <h1>URL Encode / Decode</h1>
-          <p class="hint">เข้ารหัส/ถอดรหัส URL แบบเรียลไทม์ และแยกพารามิเตอร์ query string</p>
+          <p class="hint">พิมพ์หรือวางฝั่งใดฝั่งหนึ่ง อีกฝั่งจะแปลงให้อัตโนมัติ พร้อมแยกพารามิเตอร์ query string และแปลงสลับ Query ↔ JSON</p>
         </div>
         <div class="toolbar">
           <div class="segmented" id="url-mode">
             <button class="seg-btn active" data-umode="component">Component</button>
             <button class="seg-btn" data-umode="full">Full URI</button>
           </div>
-          <button class="btn primary" data-action="url-encode">Encode →</button>
-          <button class="btn primary" data-action="url-decode">← Decode</button>
-          <button class="btn" data-action="url-swap">⇅ สลับ</button>
           <button class="btn ghost" data-action="url-clear">ล้างทั้งหมด</button>
         </div>
         <div class="grid-2">
@@ -264,6 +258,27 @@
           <div class="field-head"><label>พารามิเตอร์ที่แยกได้ (Query Params)</label></div>
           <div class="table-wrap"><table class="kv-table" id="url-params"><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody></tbody></table></div>
         </div>
+
+        <details class="adv-toggle">
+          <summary>แปลง Query String ↔ JSON</summary>
+          <div class="adv-body" style="display:block;">
+            <div class="field">
+              <div class="field-head"><label for="url-json">Query Params เป็น JSON</label><button class="copy-btn" data-copy="#url-json">คัดลอก</button></div>
+              <textarea id="url-json" class="textarea-sm" spellcheck="false" readonly placeholder="{}"></textarea>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <div class="field-head"><label for="url-json-input">JSON</label></div>
+                <textarea id="url-json-input" class="textarea-sm" spellcheck="false" placeholder='{"q":"hello","lang":"th"}'></textarea>
+              </div>
+              <div class="field">
+                <div class="field-head"><label for="url-json-output">Query String</label><button class="copy-btn" data-copy="#url-json-output">คัดลอก</button></div>
+                <textarea id="url-json-output" class="textarea-sm" spellcheck="false" readonly placeholder="ผลลัพธ์..."></textarea>
+              </div>
+            </div>
+            <div class="error" id="url-json-error"></div>
+          </div>
+        </details>
       </section>
 
       <!-- JWT -->
