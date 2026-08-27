@@ -13,11 +13,8 @@
   var modeWrap = $("format-mode");
   var mode = "json";
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
+  var showError = window.DT.bindError(errEl);
+  var sortDeep = window.DT.sortDeep;
 
   function jsonIndent() {
     var v = indentSel.value;
@@ -28,14 +25,17 @@
     return v === "tab" ? 2 : parseInt(v, 10);
   }
 
-  function sortDeep(value) {
-    if (Array.isArray(value)) return value.map(sortDeep);
-    if (value && typeof value === "object") {
-      var out = {};
-      Object.keys(value).sort().forEach(function (k) { out[k] = sortDeep(value[k]); });
-      return out;
+  /* YAML has no tab-indent concept (js-yaml only accepts a numeric indent) — disable
+     the "Tab" option while in YAML mode instead of silently substituting 2 spaces. */
+  function syncIndentOptions() {
+    var tabOption = indentSel.querySelector('option[value="tab"]');
+    if (!tabOption) return;
+    if (mode === "yaml") {
+      tabOption.disabled = true;
+      if (indentSel.value === "tab") indentSel.value = "2";
+    } else {
+      tabOption.disabled = false;
     }
-    return value;
   }
 
   function parseInput() {
@@ -110,9 +110,12 @@
       modeWrap.querySelectorAll(".seg-btn").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       mode = btn.getAttribute("data-fmt");
+      syncIndentOptions();
       pretty();
     });
   });
+
+  syncIndentOptions();
 
   panel.querySelector('[data-action="format-pretty"]').addEventListener("click", pretty);
   panel.querySelector('[data-action="format-minify"]').addEventListener("click", minify);

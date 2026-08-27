@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var TOOLS = ["base64", "url", "format", "textutils", "diff", "jwt", "hash", "regex", "uuid", "idcard", "timestamp"];
+  var TOOLS = ["home", "base64", "url", "format", "textutils", "diff", "jwt", "hash", "regex", "uuid", "idcard", "timestamp"];
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -16,6 +16,30 @@
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1600);
+  };
+
+  /* ---- Shared helpers reused across assets/js/tools/*.js (avoids duplicating these in every file) ---- */
+  window.DT = {
+    escapeHtml: function (s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    },
+    sortDeep: function sortDeep(value) {
+      if (Array.isArray(value)) return value.map(sortDeep);
+      if (value && typeof value === "object") {
+        var out = {};
+        Object.keys(value).sort().forEach(function (k) { out[k] = sortDeep(value[k]); });
+        return out;
+      }
+      return value;
+    },
+    /* Returns a showError(msg) function bound to a given error <div>; pass "" / falsy to clear. */
+    bindError: function (el) {
+      return function (msg) {
+        if (!msg) { el.classList.remove("show"); el.textContent = ""; return; }
+        el.textContent = msg;
+        el.classList.add("show");
+      };
+    }
   };
 
   /* ---- Clipboard ---- */
@@ -80,16 +104,23 @@
   /* ---- Sidebar (mobile) ---- */
   var sidebar = $("#sidebar");
   var navToggle = $("#navToggle");
+  var backdrop = $("#sidebarBackdrop");
+  function closeSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("show");
+    if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+  }
   if (navToggle) {
     navToggle.addEventListener("click", function () {
       var open = sidebar.classList.toggle("open");
       navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (backdrop) backdrop.classList.toggle("show", open);
     });
   }
+  if (backdrop) backdrop.addEventListener("click", closeSidebar);
   $all(".nav-item").forEach(function (a) {
-    a.addEventListener("click", function () {
-      if (sidebar) sidebar.classList.remove("open");
-    });
+    a.addEventListener("click", closeSidebar);
   });
 
   /* ---- Router ---- */

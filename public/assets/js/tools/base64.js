@@ -10,11 +10,7 @@
   var errEl = $("b64-error");
   var urlSafe = $("b64-urlsafe");
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
+  var showError = window.DT.bindError(errEl);
 
   function toBase64(str) {
     var bytes = new TextEncoder().encode(str);

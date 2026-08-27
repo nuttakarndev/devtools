@@ -15,13 +15,14 @@
 <div class="app">
   <header class="topbar">
     <button id="navToggle" class="icon-btn" aria-label="เปิด/ปิดเมนู" aria-expanded="false">☰</button>
-    <div class="brand">🧰 <span>DevTools Hub</span></div>
+    <a href="#home" class="brand">🧰 <span>DevTools Hub</span></a>
     <div class="spacer"></div>
     <button id="themeToggle" class="icon-btn" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">🌙</button>
   </header>
 
   <div class="layout">
     <nav class="sidebar" id="sidebar" aria-label="เมนูเครื่องมือ">
+      <a href="#home" class="nav-item nav-home" data-tool="home"><span class="ico">🏠</span>หน้าแรก</a>
       <div class="nav-group-label">แปลง / จัดรูปแบบ</div>
       <a href="#base64" class="nav-item" data-tool="base64"><span class="ico">🔐</span>Base64</a>
       <a href="#url" class="nav-item" data-tool="url"><span class="ico">🔗</span>URL Encode/Decode</a>
@@ -41,8 +42,40 @@
 
       <div class="sidebar-footer">ทำงานฝั่งเบราว์เซอร์ทั้งหมด ไม่มีข้อมูลถูกส่งขึ้นเซิร์ฟเวอร์</div>
     </nav>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <main class="content" id="content">
+
+      <!-- HOME -->
+      <section id="panel-home" class="panel" data-panel="home" hidden>
+        <div class="panel-head">
+          <h1>เลือกเครื่องมือที่ต้องการใช้งาน</h1>
+          <p class="hint">รวมเครื่องมือสำหรับนักพัฒนา ทำงานฝั่งเบราว์เซอร์ทั้งหมด ไม่มีข้อมูลถูกส่งขึ้นเซิร์ฟเวอร์</p>
+        </div>
+
+        <div class="home-section-title">แปลง / จัดรูปแบบ</div>
+        <div class="home-grid">
+          <a href="#base64" class="tool-card"><span class="tc-icon">🔐</span><span class="tc-title">Base64</span><span class="tc-desc">แปลงข้อความเป็น/จาก Base64 รองรับภาษาไทย</span></a>
+          <a href="#url" class="tool-card"><span class="tc-icon">🔗</span><span class="tc-title">URL Encode/Decode</span><span class="tc-desc">เข้ารหัส/ถอดรหัส URL และแยกพารามิเตอร์</span></a>
+          <a href="#format" class="tool-card"><span class="tc-icon">🧹</span><span class="tc-title">Pretty JSON/YAML</span><span class="tc-desc">จัดรูปแบบ ย่อ และแปลงสลับ JSON ↔ YAML</span></a>
+          <a href="#textutils" class="tool-card"><span class="tc-icon">🔤</span><span class="tc-title">Case / Text Utils</span><span class="tc-desc">camelCase, snake_case, เรียง/ลบบรรทัดซ้ำ</span></a>
+        </div>
+
+        <div class="home-section-title">ตรวจสอบ / ทดสอบ</div>
+        <div class="home-grid">
+          <a href="#diff" class="tool-card"><span class="tc-icon">🔀</span><span class="tc-title">Diff</span><span class="tc-desc">เปรียบเทียบ Text / JSON / YAML</span></a>
+          <a href="#jwt" class="tool-card"><span class="tc-icon">🪪</span><span class="tc-title">JWT Decode</span><span class="tc-desc">ถอดรหัสและตรวจสอบลายเซ็น JWT</span></a>
+          <a href="#hash" class="tool-card"><span class="tc-icon">🔒</span><span class="tc-title">Hash Generator</span><span class="tc-desc">SHA-1 / SHA-256 / SHA-384 / SHA-512</span></a>
+          <a href="#regex" class="tool-card"><span class="tc-icon">🧪</span><span class="tc-title">Regex Tester</span><span class="tc-desc">ทดสอบ regex พร้อมแพทเทิร์นสำเร็จรูป</span></a>
+        </div>
+
+        <div class="home-section-title">สร้างข้อมูล</div>
+        <div class="home-grid">
+          <a href="#uuid" class="tool-card"><span class="tc-icon">🆔</span><span class="tc-title">UUID Generator</span><span class="tc-desc">สุ่ม UUID v4 ได้ครั้งละหลายรายการ</span></a>
+          <a href="#idcard" class="tool-card"><span class="tc-icon">🪪</span><span class="tc-title">เลขบัตรประชาชน</span><span class="tc-desc">สุ่ม/ตรวจสอบเลขทดสอบ (ไม่ใช่ของจริง)</span></a>
+          <a href="#timestamp" class="tool-card"><span class="tc-icon">⏱️</span><span class="tc-title">Timestamp</span><span class="tc-desc">แปลง Unix Timestamp ↔ วันที่-เวลา</span></a>
+        </div>
+      </section>
 
       <!-- BASE64 -->
       <section id="panel-base64" class="panel" data-panel="base64" hidden>
@@ -82,14 +115,19 @@
             <button class="seg-btn" data-mode="json">JSON</button>
             <button class="seg-btn" data-mode="yaml">YAML</button>
           </div>
-          <div class="segmented" id="diff-granularity">
-            <button class="seg-btn active" data-gran="line">บรรทัด</button>
-            <button class="seg-btn" data-gran="word">คำ</button>
-            <button class="seg-btn" data-gran="char">ตัวอักษร</button>
-          </div>
-          <label class="checkbox"><input type="checkbox" id="diff-sortkeys"> เรียง key (JSON/YAML)</label>
           <button class="btn ghost" data-action="diff-clear">ล้างทั้งหมด</button>
         </div>
+        <details class="adv-toggle">
+          <summary>ตัวเลือกเพิ่มเติม</summary>
+          <div class="adv-body">
+            <div class="segmented" id="diff-granularity">
+              <button class="seg-btn active" data-gran="line">บรรทัด</button>
+              <button class="seg-btn" data-gran="word">คำ</button>
+              <button class="seg-btn" data-gran="char">ตัวอักษร</button>
+            </div>
+            <label class="checkbox"><input type="checkbox" id="diff-sortkeys"> เรียง key (JSON/YAML)</label>
+          </div>
+        </details>
         <div class="grid-2">
           <div class="field">
             <div class="field-head"><label for="diff-a">ต้นฉบับ (A)</label></div>
@@ -116,20 +154,25 @@
             <button class="seg-btn active" data-fmt="json">JSON</button>
             <button class="seg-btn" data-fmt="yaml">YAML</button>
           </div>
-          <label class="select-label">ย่อหน้า
-            <select id="format-indent">
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="tab">Tab</option>
-            </select>
-          </label>
-          <label class="checkbox"><input type="checkbox" id="format-sortkeys"> เรียง key</label>
           <button class="btn primary" data-action="format-pretty">จัดรูปแบบ</button>
-          <button class="btn" data-action="format-minify">ย่อ (Minify)</button>
-          <button class="btn" data-action="format-tojson">→ JSON</button>
-          <button class="btn" data-action="format-toyaml">→ YAML</button>
           <button class="btn ghost" data-action="format-clear">ล้างทั้งหมด</button>
         </div>
+        <details class="adv-toggle">
+          <summary>ตัวเลือกเพิ่มเติม (ย่อหน้า, minify, แปลงสลับ)</summary>
+          <div class="adv-body">
+            <label class="select-label">ย่อหน้า
+              <select id="format-indent">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="tab">Tab</option>
+              </select>
+            </label>
+            <label class="checkbox"><input type="checkbox" id="format-sortkeys"> เรียง key</label>
+            <button class="btn" data-action="format-minify">ย่อ (Minify)</button>
+            <button class="btn" data-action="format-tojson">→ JSON</button>
+            <button class="btn" data-action="format-toyaml">→ YAML</button>
+          </div>
+        </details>
         <div class="grid-2">
           <div class="field">
             <div class="field-head"><label for="format-input">Input</label><button class="copy-btn" data-copy="#format-input">คัดลอก</button></div>
@@ -166,14 +209,17 @@
           <button class="btn primary" data-action="tu-apply-case">แปลง</button>
           <button class="btn ghost" data-action="tu-clear">ล้างทั้งหมด</button>
         </div>
-        <div class="toolbar">
-          <button class="btn" data-action="tu-trim">ตัดช่องว่างแต่ละบรรทัด</button>
-          <button class="btn" data-action="tu-remove-empty">ลบบรรทัดว่าง</button>
-          <button class="btn" data-action="tu-dedupe">ลบบรรทัดซ้ำ</button>
-          <button class="btn" data-action="tu-sort-asc">เรียง A→Z</button>
-          <button class="btn" data-action="tu-sort-desc">เรียง Z→A</button>
-          <button class="btn" data-action="tu-reverse-lines">กลับลำดับบรรทัด</button>
-        </div>
+        <details class="adv-toggle">
+          <summary>เครื่องมือจัดการบรรทัด (trim / ลบซ้ำ / เรียงลำดับ)</summary>
+          <div class="adv-body">
+            <button class="btn" data-action="tu-trim">ตัดช่องว่างแต่ละบรรทัด</button>
+            <button class="btn" data-action="tu-remove-empty">ลบบรรทัดว่าง</button>
+            <button class="btn" data-action="tu-dedupe">ลบบรรทัดซ้ำ</button>
+            <button class="btn" data-action="tu-sort-asc">เรียง A→Z</button>
+            <button class="btn" data-action="tu-sort-desc">เรียง Z→A</button>
+            <button class="btn" data-action="tu-reverse-lines">กลับลำดับบรรทัด</button>
+          </div>
+        </details>
         <div class="grid-2">
           <div class="field">
             <div class="field-head"><label for="tu-input">Input</label><button class="copy-btn" data-copy="#tu-input">คัดลอก</button></div>
@@ -293,18 +339,23 @@
             <span class="slash">/</span>
             <input id="regex-flags" type="text" value="g" maxlength="6" autocomplete="off" spellcheck="false" title="flags">
           </div>
-          <div class="flag-toggles" id="flag-toggles">
-            <button type="button" class="flag-btn active" data-flag="g" title="global">g</button>
-            <button type="button" class="flag-btn" data-flag="i" title="ignore case">i</button>
-            <button type="button" class="flag-btn" data-flag="m" title="multiline">m</button>
-            <button type="button" class="flag-btn" data-flag="s" title="dotAll">s</button>
-            <button type="button" class="flag-btn" data-flag="u" title="unicode">u</button>
-            <button type="button" class="flag-btn" data-flag="y" title="sticky">y</button>
-          </div>
           <select id="regex-presets" class="select-label">
             <option value="">— เลือกแพทเทิร์นสำเร็จรูป —</option>
           </select>
         </div>
+        <details class="adv-toggle">
+          <summary>ตัวเลือก flags แบบละเอียด</summary>
+          <div class="adv-body">
+            <div class="flag-toggles" id="flag-toggles">
+              <button type="button" class="flag-btn active" data-flag="g" title="global">g</button>
+              <button type="button" class="flag-btn" data-flag="i" title="ignore case">i</button>
+              <button type="button" class="flag-btn" data-flag="m" title="multiline">m</button>
+              <button type="button" class="flag-btn" data-flag="s" title="dotAll">s</button>
+              <button type="button" class="flag-btn" data-flag="u" title="unicode">u</button>
+              <button type="button" class="flag-btn" data-flag="y" title="sticky">y</button>
+            </div>
+          </div>
+        </details>
         <div class="field">
           <div class="field-head"><label for="regex-test">ข้อความทดสอบ</label></div>
           <textarea id="regex-test" spellcheck="false" placeholder="วางข้อความที่ต้องการทดสอบที่นี่..."></textarea>
@@ -337,11 +388,16 @@
           <label class="select-label">จำนวน
             <input id="uuid-count" type="number" min="1" max="200" value="1" style="width:5rem;">
           </label>
-          <label class="checkbox"><input type="checkbox" id="uuid-upper"> ตัวพิมพ์ใหญ่</label>
-          <label class="checkbox"><input type="checkbox" id="uuid-nohyphen"> ไม่มีขีด (-)</label>
           <button class="btn primary" data-action="uuid-generate">สร้าง UUID</button>
           <button class="btn ghost" data-action="uuid-clear">ล้างทั้งหมด</button>
         </div>
+        <details class="adv-toggle">
+          <summary>ตัวเลือกรูปแบบ</summary>
+          <div class="adv-body">
+            <label class="checkbox"><input type="checkbox" id="uuid-upper"> ตัวพิมพ์ใหญ่</label>
+            <label class="checkbox"><input type="checkbox" id="uuid-nohyphen"> ไม่มีขีด (-)</label>
+          </div>
+        </details>
         <div class="field">
           <div class="field-head"><label for="uuid-output">ผลลัพธ์</label><button class="copy-btn" data-copy="#uuid-output">คัดลอกทั้งหมด</button></div>
           <textarea id="uuid-output" spellcheck="false" readonly></textarea>

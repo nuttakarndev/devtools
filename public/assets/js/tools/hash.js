@@ -13,14 +13,11 @@
   var fileInfoEl = $("hash-file-info");
   var errEl = $("hash-error");
   var mode = "text";
+  var requestId = 0; /* guards against a stale text/file digest overwriting a newer one after a mode switch */
 
   var ALGOS = [["SHA-1", "hash-sha1"], ["SHA-256", "hash-sha256"], ["SHA-384", "hash-sha384"], ["SHA-512", "hash-sha512"]];
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
+  var showError = window.DT.bindError(errEl);
 
   function clearResults() {
     ALGOS.forEach(function (a) { $(a[1]).value = ""; });
@@ -49,11 +46,14 @@
       return;
     }
     showError("");
+    var myRequest = ++requestId;
     var subtle = window.crypto.subtle;
     ALGOS.forEach(function (a) {
       subtle.digest(a[0], dataBuffer).then(function (buf) {
+        if (myRequest !== requestId) return; /* a newer text/file computation superseded this one */
         $(a[1]).value = bufToHex(buf);
       }).catch(function (e) {
+        if (myRequest !== requestId) return;
         showError("คำนวณแฮชไม่สำเร็จ: " + e.message);
       });
     });
@@ -75,10 +75,13 @@
     });
   }
 
+  var debounceTimer = null;
+
   modeWrap.querySelectorAll(".seg-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       modeWrap.querySelectorAll(".seg-btn").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
+      clearTimeout(debounceTimer); /* a pending debounced text hash must not overwrite the newly selected mode's result */
       mode = btn.getAttribute("data-hmode");
       textWrap.hidden = mode !== "text";
       fileWrap.hidden = mode !== "file";
@@ -89,7 +92,6 @@
     });
   });
 
-  var debounceTimer = null;
   inputEl.addEventListener("input", function () {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(computeText, 150);

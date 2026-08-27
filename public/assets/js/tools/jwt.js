@@ -13,13 +13,7 @@
   var secretEl = $("jwt-secret");
   var resultEl = $("jwt-verify-result");
 
-  var TIME_CLAIMS = { exp: "หมดอายุ (exp)", iat: "ออกเมื่อ (iat)", nbf: "ใช้งานได้ตั้งแต่ (nbf)" };
-
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
+  var showError = window.DT.bindError(errEl);
 
   function showResult(msg, ok) {
     resultEl.textContent = msg;
@@ -56,9 +50,7 @@
     return '<span class="badge' + (cls ? " " + cls : "") + '">' + text + "</span>";
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
+  var escapeHtml = window.DT.escapeHtml;
 
   function renderBadges(header, payload, hasSignature) {
     var now = Math.floor(Date.now() / 1000);

@@ -12,15 +12,8 @@
   var paramsBody = $("url-params").querySelector("tbody");
   var mode = "component";
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
+  var showError = window.DT.bindError(errEl);
+  var escapeHtml = window.DT.escapeHtml;
 
   function parseParams(text) {
     var qs = text;

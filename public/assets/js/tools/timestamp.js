@@ -11,11 +11,7 @@
   var datetimeEl = $("ts-datetime");
   var unixResultEl = $("ts-unix-result");
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
+  var showError = window.DT.bindError(errEl);
 
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
 

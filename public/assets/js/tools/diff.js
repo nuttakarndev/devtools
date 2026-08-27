@@ -16,25 +16,9 @@
   var mode = "text";
   var gran = "line";
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
-
-  function escapeHtml(s) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  function sortDeep(value) {
-    if (Array.isArray(value)) return value.map(sortDeep);
-    if (value && typeof value === "object") {
-      var out = {};
-      Object.keys(value).sort().forEach(function (k) { out[k] = sortDeep(value[k]); });
-      return out;
-    }
-    return value;
-  }
+  var showError = window.DT.bindError(errEl);
+  var escapeHtml = window.DT.escapeHtml;
+  var sortDeep = window.DT.sortDeep;
 
   function normalize(text, label) {
     if (mode === "text") return text;

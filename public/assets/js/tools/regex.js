@@ -40,15 +40,9 @@
     presetsEl.appendChild(opt);
   });
 
-  function showError(msg) {
-    if (!msg) { errEl.classList.remove("show"); errEl.textContent = ""; return; }
-    errEl.textContent = msg;
-    errEl.classList.add("show");
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
+  var showError = window.DT.bindError(errEl);
+  var escapeHtml = window.DT.escapeHtml;
+  var MATCH_LIMIT = 5000;
 
   function syncButtonsFromInput() {
     var val = flagsEl.value;
@@ -99,24 +93,26 @@
     var htmlParts = [];
     var lastIndex = 0;
     var m;
-    var guard = 0;
+    var truncated = false;
     while ((m = hRe.exec(text)) !== null) {
+      if (matches.length >= MATCH_LIMIT) { truncated = true; break; }
       matches.push(m);
       htmlParts.push(escapeHtml(text.slice(lastIndex, m.index)));
       htmlParts.push("<mark>" + (escapeHtml(m[0]) || "&nbsp;") + "</mark>");
       lastIndex = m.index + m[0].length;
       if (m[0].length === 0) { hRe.lastIndex++; }
-      guard++;
-      if (guard > 5000) break;
     }
     htmlParts.push(escapeHtml(text.slice(lastIndex)));
     highlightEl.innerHTML = htmlParts.length ? htmlParts.join("") : escapeHtml(text);
 
-    countEl.textContent = String(matches.length);
+    countEl.textContent = String(matches.length) + (truncated ? "+" : "");
     if (!matches.length) {
       matchesEl.innerHTML = '<div class="matches-empty">ไม่พบข้อความที่ตรงกัน</div>';
     } else {
-      matchesEl.innerHTML = matches.map(function (mm, i) {
+      var truncNotice = truncated
+        ? '<div class="matches-empty">⚠ พบมากกว่า ' + MATCH_LIMIT + ' รายการ แสดงผลเพียง ' + MATCH_LIMIT + ' รายการแรก</div>'
+        : "";
+      matchesEl.innerHTML = truncNotice + matches.map(function (mm, i) {
         var groupsHtml = "";
         var gs = [];
         for (var gi = 1; gi < mm.length; gi++) {
