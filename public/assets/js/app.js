@@ -131,6 +131,23 @@
   });
 
   /* ---- Router ---- */
+  var BRAND = "DevTools Hub";
+  var HOME_TITLE = document.title; /* the <title> shipped in index.html */
+
+  /* Reads a tool's display name off its sidebar link rather than a second
+     hardcoded list, so adding a tool only means adding its nav item. Only
+     text nodes are collected, which skips the leading <span class="ico">. */
+  function toolLabel(name) {
+    var nav = $('.nav-item[data-tool="' + name + '"]');
+    if (!nav) return name;
+    var label = "";
+    Array.prototype.forEach.call(nav.childNodes, function (node) {
+      if (node.nodeType === 3) label += node.nodeValue;
+    });
+    label = label.trim();
+    return label || name;
+  }
+
   function showTool(name) {
     if (TOOLS.indexOf(name) === -1) name = TOOLS[0];
     TOOLS.forEach(function (t) {
@@ -139,7 +156,9 @@
       var nav = $('.nav-item[data-tool="' + t + '"]');
       if (nav) nav.classList.toggle("active", t === name);
     });
-    document.title = "DevTools Hub — " + name;
+    /* Tool name first: browser tabs truncate the tail, so leading with the
+       brand made every tab read "DevTools Hub — ...". */
+    document.title = name === "home" ? HOME_TITLE : toolLabel(name) + " — " + BRAND;
     var content = $("#content");
     if (content) content.scrollTop = 0;
   }
