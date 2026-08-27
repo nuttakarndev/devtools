@@ -18,7 +18,14 @@
   function parseParams(text) {
     var qs = text;
     var qIndex = qs.indexOf("?");
-    if (qIndex !== -1) qs = qs.slice(qIndex + 1);
+    if (qIndex !== -1) {
+      qs = qs.slice(qIndex + 1);
+    } else if (qs.indexOf("=") === -1) {
+      /* No "?" and no "=" at all — this isn't a query string (e.g. a bare
+         "www.google.com"), so don't let URLSearchParams misread the whole
+         input as a single key with an empty value. */
+      return [];
+    }
     var hIndex = qs.indexOf("#");
     if (hIndex !== -1) qs = qs.slice(0, hIndex);
     qs = qs.trim();
