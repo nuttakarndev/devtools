@@ -15,7 +15,7 @@
 <div class="app">
   <header class="topbar">
     <button id="navToggle" class="icon-btn" aria-label="เปิด/ปิดเมนู" aria-expanded="false">☰</button>
-    <a href="#home" class="brand">🧰 <span>DevTools Hub</span></a>
+    <a href="#home" class="brand"><span class="logo">🧰</span><span>DevTools Hub</span></a>
     <div class="spacer"></div>
     <button id="themeToggle" class="icon-btn" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">🌙</button>
   </header>
@@ -31,7 +31,7 @@
 
       <div class="nav-group-label">ตรวจสอบ / ทดสอบ</div>
       <a href="#diff" class="nav-item" data-tool="diff"><span class="ico">🔀</span>Diff Text/JSON/YAML</a>
-      <a href="#jwt" class="nav-item" data-tool="jwt"><span class="ico">🪪</span>JWT Decode</a>
+      <a href="#jwt" class="nav-item" data-tool="jwt"><span class="ico">🎫</span>JWT Decode</a>
       <a href="#hash" class="nav-item" data-tool="hash"><span class="ico">🔒</span>Hash Generator</a>
       <a href="#regex" class="nav-item" data-tool="regex"><span class="ico">🧪</span>Regex Tester</a>
 
@@ -64,7 +64,7 @@
         <div class="home-section-title">ตรวจสอบ / ทดสอบ</div>
         <div class="home-grid">
           <a href="#diff" class="tool-card"><span class="tc-icon">🔀</span><span class="tc-title">Diff</span><span class="tc-desc">เปรียบเทียบ Text / JSON / YAML</span></a>
-          <a href="#jwt" class="tool-card"><span class="tc-icon">🪪</span><span class="tc-title">JWT Decode</span><span class="tc-desc">ถอดรหัสและตรวจสอบลายเซ็น JWT</span></a>
+          <a href="#jwt" class="tool-card"><span class="tc-icon">🎫</span><span class="tc-title">JWT Decode</span><span class="tc-desc">ถอดรหัสและตรวจสอบลายเซ็น JWT</span></a>
           <a href="#hash" class="tool-card"><span class="tc-icon">🔒</span><span class="tc-title">Hash Generator</span><span class="tc-desc">SHA-1 / SHA-256 / SHA-384 / SHA-512</span></a>
           <a href="#regex" class="tool-card"><span class="tc-icon">🧪</span><span class="tc-title">Regex Tester</span><span class="tc-desc">ทดสอบ regex พร้อมแพทเทิร์นสำเร็จรูป</span></a>
         </div>
@@ -322,6 +322,7 @@
             <button class="seg-btn active" data-hmode="text">ข้อความ</button>
             <button class="seg-btn" data-hmode="file">ไฟล์</button>
           </div>
+          <button class="btn ghost" data-action="hash-clear">ล้างทั้งหมด</button>
         </div>
         <div class="field" id="hash-text-wrap">
           <div class="field-head"><label for="hash-input">ข้อความ</label></div>
@@ -357,6 +358,7 @@
           <select id="regex-presets" class="select-label">
             <option value="">— เลือกแพทเทิร์นสำเร็จรูป —</option>
           </select>
+          <button class="btn ghost" data-action="regex-clear">ล้างทั้งหมด</button>
         </div>
         <details class="adv-toggle">
           <summary>ตัวเลือก flags แบบละเอียด</summary>
@@ -427,7 +429,7 @@
         </div>
         <div class="toolbar">
           <label class="select-label">จำนวน
-            <input id="idc-count" type="number" min="1" max="100" value="5" style="width:5rem;">
+            <input id="idc-count" type="number" min="1" max="100" value="1" style="width:5rem;">
           </label>
           <label class="checkbox"><input type="checkbox" id="idc-dash" checked> ใส่ขีด (-)</label>
           <button class="btn primary" data-action="idc-generate">สุ่มสร้าง</button>
@@ -449,6 +451,9 @@
         <div class="panel-head">
           <h1>Timestamp Converter</h1>
           <p class="hint">แปลง Unix Timestamp ↔ วันที่-เวลา แบบเรียลไทม์</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn ghost" data-action="ts-clear">ล้างทั้งหมด</button>
         </div>
         <div class="grid-2">
           <div class="field">

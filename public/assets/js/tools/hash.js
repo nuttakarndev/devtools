@@ -98,5 +98,13 @@
   });
   fileEl.addEventListener("change", function () { computeFile(fileEl.files[0]); });
 
+  panel.querySelector('[data-action="hash-clear"]').addEventListener("click", function () {
+    inputEl.value = "";
+    fileEl.value = "";
+    fileInfoEl.textContent = "";
+    showError("");
+    clearResults();
+  });
+
   computeText();
 })();

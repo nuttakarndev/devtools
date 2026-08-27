@@ -1,25 +1,29 @@
-/* ===== Theme tokens (muted, low-glare palette) ===== */
+/* ===== Theme tokens (muted, low-glare palette) =====
+   Neutrals share one cool blue-grey undertone in both themes so surfaces stack
+   cleanly; color-scheme keeps native controls (select, datetime-local, number
+   spinners, file input, scrollbars) matching the active theme. */
 :root{
-  --bg:#eef0f2;
-  --bg-elev:#f9faf9;
-  --bg-inset:#e5e8eb;
-  --border:#d4d8dd;
-  --text:#272b33;
-  --text-muted:#5c6370;
-  --accent:#42599e;
+  color-scheme:light;
+  --bg:#f2f5f9;
+  --bg-elev:#ffffff;
+  --bg-inset:#e8edf4;
+  --border:#d5dde7;
+  --text:#1e2733;
+  --text-muted:#5a6675;
+  --accent:#3860c9;
   --accent-contrast:#ffffff;
-  --accent-soft:#dbe1f0;
-  --danger:#a8433f;
-  --danger-soft:#f2dcdb;
-  --add-bg:#dbe8dc;
-  --add-text:#356b3d;
-  --add-strong:#a9d9b4;
-  --del-bg:#ecdcdb;
-  --del-text:#8f4038;
-  --del-strong:#e3aca7;
-  --mark-bg:#e9d38f;
-  --mark-text:#3a2e08;
-  --shadow:0 1px 2px rgba(20,20,40,.06), 0 4px 16px rgba(20,20,40,.06);
+  --accent-soft:#dde5fa;
+  --danger:#b5352f;
+  --danger-soft:#fbe3e0;
+  --add-bg:#daf1e0;
+  --add-text:#16653a;
+  --add-strong:#b0e9c3;
+  --del-bg:#fde3e1;
+  --del-text:#9c312a;
+  --del-strong:#fbccc7;
+  --mark-bg:#ffe9a8;
+  --mark-text:#5a4405;
+  --shadow:0 1px 2px rgba(20,30,60,.06), 0 4px 16px rgba(20,30,60,.07);
   --radius:10px;
   --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, "Liberation Mono", Menlo, "Sarabun", "Noto Sans Thai", monospace;
   --font-ui: "Sarabun", "Noto Sans Thai", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
@@ -27,25 +31,26 @@
 }
 
 :root[data-theme="dark"]{
-  --bg:#181b21;
-  --bg-elev:#20242c;
-  --bg-inset:#15171d;
-  --border:#2e333d;
-  --text:#dfe2e9;
-  --text-muted:#8a90a0;
-  --accent:#8ea0e0;
-  --accent-contrast:#13151b;
-  --accent-soft:#2b3350;
-  --danger:#dd9490;
-  --danger-soft:#3a2624;
-  --add-bg:#20342a;
-  --add-text:#94cea0;
-  --add-strong:#2f6b46;
-  --del-bg:#372525;
-  --del-text:#e0a49f;
-  --del-strong:#7a3c35;
-  --mark-bg:#4a3e1e;
-  --mark-text:#ecd696;
+  color-scheme:dark;
+  --bg:#14171d;
+  --bg-elev:#1c2029;
+  --bg-inset:#101319;
+  --border:#2b313c;
+  --text:#e3e7ee;
+  --text-muted:#8e97a8;
+  --accent:#7d9bff;
+  --accent-contrast:#0f1218;
+  --accent-soft:#26304d;
+  --danger:#f08a83;
+  --danger-soft:#3d2422;
+  --add-bg:#16321f;
+  --add-text:#8ee0a6;
+  --add-strong:#265f3d;
+  --del-bg:#3a1f1e;
+  --del-text:#f2b0aa;
+  --del-strong:#6d302b;
+  --mark-bg:#4d3f18;
+  --mark-text:#f2d98f;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
 }
 
@@ -60,6 +65,19 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+::selection{background:var(--accent-soft); color:var(--text);}
+
+/* Cross-fade the themed surfaces so the theme toggle reads as a transition
+   rather than a snap. Scoped to the surface-level elements — not "*" — so
+   typing in a textarea stays instant. */
+body, .topbar, .sidebar, .content, .btn, .seg-btn, .flag-btn, .icon-btn,
+.tool-card, .adv-toggle, .hash-row, .matches-list, .table-wrap,
+textarea, select, input, .regex-input-wrap, .regex-highlight, .diff-output, .toast{
+  transition:background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+/* press feedback on every clickable control */
+.btn:active, .seg-btn:active, .flag-btn:active, .copy-btn:active, .icon-btn:active{transform:translateY(1px);}
+
 .app{display:flex; flex-direction:column; min-height:100vh;}
 
 /* ===== Topbar ===== */
@@ -70,7 +88,18 @@ body{
   border-bottom:1px solid var(--border);
   position:sticky; top:0; z-index:20;
 }
-.brand{font-family:var(--font-heading); font-weight:600; font-size:1.1rem; display:flex; align-items:center; gap:.4rem;}
+/* The only <a> in the topbar — it needs the same color/underline reset that
+   .nav-item and .tool-card carry, or it falls back to the browser's blue
+   (and purple-when-visited) default link styling. */
+.brand{
+  font-family:var(--font-heading); font-weight:600; font-size:1.05rem;
+  display:flex; align-items:center; gap:.45rem;
+  color:var(--text); text-decoration:none; letter-spacing:-.01em;
+  padding:.2rem .35rem; margin-left:-.35rem; border-radius:8px;
+  transition:color .15s, background-color .15s;
+}
+.brand:hover{color:var(--accent); background:var(--bg-inset);}
+.brand .logo{font-size:1.2rem; line-height:1;}
 .spacer{flex:1;}
 .icon-btn{
   background:transparent; border:1px solid var(--border); color:var(--text);
@@ -89,13 +118,19 @@ body{
   display:flex; flex-direction:column; gap:.3rem;
 }
 .nav-item{
-  display:flex; align-items:center; gap:.6rem;
+  display:flex; align-items:center; gap:.6rem; position:relative;
   padding:.6rem .7rem; border-radius:8px; min-height:2.6rem;
   color:var(--text); text-decoration:none; font-size:.92rem;
+  transition:background-color .15s, color .15s;
 }
 .nav-item .ico{font-size:1.05rem;}
 .nav-item:hover{background:var(--bg-inset);}
 .nav-item.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+/* accent bar marking the current tool */
+.nav-item.active::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:3px; height:1.3rem; border-radius:0 3px 3px 0; background:var(--accent);
+}
 .nav-home{font-weight:600; margin-bottom:.3rem;}
 .sidebar-backdrop{
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:14;
@@ -115,6 +150,9 @@ body{
 
 /* ===== Panels ===== */
 .panel[hidden]{display:none;}
+/* the router flips [hidden], so this replays each time a tool is opened */
+.panel:not([hidden]){animation:panel-in .22s ease-out;}
+@keyframes panel-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 .panel-head h1{margin:0 0 .35rem; font-size:1.35rem; font-family:var(--font-heading); font-weight:600;}
 .panel-head .hint{margin:0 0 1.5rem; color:var(--text-muted); font-size:.88rem;}
 
@@ -151,9 +189,11 @@ body{
 .tool-card{
   display:flex; flex-direction:column; gap:.4rem; padding:1.3rem;
   border:1px solid var(--border); border-radius:var(--radius); background:var(--bg-elev);
-  text-decoration:none; color:var(--text); transition:border-color .15s, transform .15s;
+  text-decoration:none; color:var(--text);
+  transition:border-color .15s, transform .15s, box-shadow .15s;
 }
-.tool-card:hover{border-color:var(--accent); transform:translateY(-2px);}
+.tool-card:hover{border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow);}
+.tool-card:active{transform:translateY(0);}
 .tool-card .tc-icon{font-size:1.6rem;}
 .tool-card .tc-title{font-family:var(--font-heading); font-weight:600; font-size:1rem;}
 .tool-card .tc-desc{font-size:.82rem; color:var(--text-muted); line-height:1.5;}
@@ -212,6 +252,10 @@ textarea[readonly]{background:var(--bg-inset);}
   font-size:.72rem; padding:.2rem .5rem; border-radius:6px; cursor:pointer; font-family:inherit;
 }
 .copy-btn:hover{background:var(--bg-inset); color:var(--text);}
+.copy-btn{transition:background-color .15s, color .15s, border-color .15s;}
+/* flashed by app.js right after a successful copy — colour only, so the
+   button keeps its label and the row does not reflow */
+.copy-btn.copied{background:var(--add-bg); color:var(--add-text); border-color:var(--add-text);}
 
 .error{
   display:none; background:var(--danger-soft); color:var(--danger);
@@ -230,10 +274,12 @@ textarea[readonly]{background:var(--bg-inset);}
 .d-ctx{display:block; padding:0 .3rem; color:var(--text-muted);}
 .d-add-inline{background:var(--add-bg); color:var(--add-text); border-radius:3px;}
 .d-del-inline{background:var(--del-bg); color:var(--del-text); border-radius:3px; text-decoration:line-through;}
-.d-sep{
-  display:block; padding:.2rem .3rem; margin:.15rem 0; color:var(--text-muted);
-  font-style:italic; text-align:center; opacity:.85;
+.d-file{display:block; padding:0 .3rem; color:var(--text-muted); font-weight:600;}
+.d-hunk{
+  display:block; padding:.15rem .3rem; margin:.45rem 0 .15rem;
+  background:var(--accent-soft); color:var(--accent); border-radius:3px; font-weight:600;
 }
+.d-file + .d-hunk, .d-file + .d-file + .d-hunk{margin-top:.15rem;}
 .d-word-add{background:var(--add-strong); border-radius:3px; padding:0 2px; font-weight:600;}
 .d-word-del{background:var(--del-strong); border-radius:3px; padding:0 2px; text-decoration:line-through;}
 
@@ -252,6 +298,7 @@ textarea[readonly]{background:var(--bg-inset);}
   background:var(--bg-elev); border:1px solid var(--border); border-radius:8px; padding:.55rem .75rem;
 }
 .hash-row label{flex:0 0 5.5rem; font-size:.8rem; color:var(--text-muted); font-weight:600;}
+#ts-result .hash-row label, #ts-unix-result .hash-row label{flex-basis:9rem;}
 .hash-row input{
   flex:1; min-width:0; background:transparent; border:none; color:var(--text);
   font-family:var(--font-mono); font-size:.85rem; padding:.2rem;
@@ -333,6 +380,13 @@ textarea[readonly]{background:var(--bg-inset);}
 @media (min-width: 861px){
   #navToggle{display:none;}
   .sidebar-backdrop{display:none !important;}
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important; scroll-behavior:auto !important;
+  }
+  .tool-card:hover{transform:none;}
 }
 @media (max-width: 480px){
   .home-grid{grid-template-columns:1fr;}

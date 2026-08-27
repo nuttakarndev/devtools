@@ -106,6 +106,14 @@
     computeFromDatetime();
   });
 
+  panel.querySelector('[data-action="ts-clear"]').addEventListener("click", function () {
+    unixEl.value = "";
+    datetimeEl.value = "";
+    showError("");
+    resultEl.innerHTML = "";
+    unixResultEl.innerHTML = "";
+  });
+
   var debounceTimer = null;
   unixEl.addEventListener("input", function () {
     clearTimeout(debounceTimer);

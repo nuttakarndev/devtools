@@ -5,7 +5,7 @@
 ## Features
 
 - **Base64** — encode/decode รองรับ UTF-8/ภาษาไทย และโหมด URL-safe
-- **Diff** — เปรียบเทียบ Text / JSON / YAML แบบเรียลไทม์ (บรรทัด/คำ/ตัวอักษร)
+- **Diff** — เปรียบเทียบ Text / JSON / YAML แบบเรียลไทม์ (บรรทัด/คำ/ตัวอักษร) โหมด "บรรทัด" แสดงผลเป็น unified diff แบบเดียวกับ `git diff` (มี `@@` hunk header, context 3 บรรทัด, ตัดส่วนที่เหมือนกันออก)
 - **Pretty / Minify JSON & YAML** — จัดรูปแบบ ย่อขนาด แปลงสลับ JSON ↔ YAML เรียง key ได้
 - **URL Encode/Decode** — โหมด Component/Full URI พร้อมแยกพารามิเตอร์ query string
 - **JWT Decode/Verify** — ถอดรหัส Header/Payload อ่านวันหมดอายุ (exp/iat/nbf) และตรวจสอบลายเซ็น HS256 ด้วย secret

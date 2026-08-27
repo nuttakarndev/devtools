@@ -31,8 +31,7 @@
     }
   }
 
-  var CONTEXT_KEEP = 3; /* unchanged lines to keep around each change before collapsing a long run */
-  var CONTEXT_COLLAPSE_AT = 8; /* only collapse a run of unchanged lines longer than this */
+  var CONTEXT_KEEP = 3; /* unchanged lines kept around each change — same as git's default -U3 */
 
   function splitLines(value) {
     var lines = value.split("\n");
@@ -58,10 +57,34 @@
     return html || " ";
   }
 
+  /* "@@ -aStart,aCount +bStart,bCount @@" over one hunk. A count of 1 is written
+     without the count, and a side with no lines at all points at the line it
+     follows — both exactly as git formats a unified diff header. */
+  function hunkHeader(hunk) {
+    var aStart = 0, bStart = 0, aCount = 0, bCount = 0;
+    hunk.forEach(function (e) {
+      if (e.type !== "add") { if (aCount === 0) aStart = e.aLine; aCount++; }
+      if (e.type !== "del") { if (bCount === 0) bStart = e.bLine; bCount++; }
+    });
+    if (aCount === 0) aStart = hunk[0].aLine - 1;
+    if (bCount === 0) bStart = hunk[0].bLine - 1;
+    return "@@ -" + aStart + (aCount === 1 ? "" : "," + aCount) +
+      " +" + bStart + (bCount === 1 ? "" : "," + bCount) + " @@";
+  }
+
   function renderLineDiff(parts) {
-    var entries = []; /* {type:'ctx'|'add'|'del', html} */
+    var entries = []; /* {type:'ctx'|'add'|'del', html, aLine, bLine} */
     var added = 0, removed = 0;
+    var aNo = 1, bNo = 1;
     var i = 0;
+
+    /* Entries are pushed in display order, so each one records the A/B line
+       number it occupies and advances only the side(s) it consumes. */
+    function push(type, html) {
+      entries.push({ type: type, html: html, aLine: aNo, bLine: bNo });
+      if (type !== "add") aNo++;
+      if (type !== "del") bNo++;
+    }
 
     while (i < parts.length) {
       var part = parts[i];
@@ -70,17 +93,20 @@
       if (part.removed && next && next.added) {
         /* A removed block immediately followed by an added block is almost
            always the same line(s) edited — pair them up and diff by word so
-           only the actual change is highlighted, not the whole line. */
+           only the actual change is highlighted, not the whole line. git
+           prints every "-" line before every "+" line, so the pairs are
+           emitted in two passes instead of interleaved. */
         var delLines = splitLines(part.value);
         var addLines = splitLines(next.value);
         var pairCount = Math.min(delLines.length, addLines.length);
-        for (var p = 0; p < pairCount; p++) {
-          var wordParts = window.Diff.diffWords(delLines[p], addLines[p]);
-          entries.push({ type: "del", html: renderWordDiffSide(wordParts, "del") });
-          entries.push({ type: "add", html: renderWordDiffSide(wordParts, "add") });
+        var wordDiffs = [];
+        for (var p = 0; p < pairCount; p++) wordDiffs.push(window.Diff.diffWords(delLines[p], addLines[p]));
+        for (var d = 0; d < delLines.length; d++) {
+          push("del", d < pairCount ? renderWordDiffSide(wordDiffs[d], "del") : escapeHtml(delLines[d]) || " ");
         }
-        for (var d = pairCount; d < delLines.length; d++) entries.push({ type: "del", html: escapeHtml(delLines[d]) || " " });
-        for (var a = pairCount; a < addLines.length; a++) entries.push({ type: "add", html: escapeHtml(addLines[a]) || " " });
+        for (var a = 0; a < addLines.length; a++) {
+          push("add", a < pairCount ? renderWordDiffSide(wordDiffs[a], "add") : escapeHtml(addLines[a]) || " ");
+        }
         removed += delLines.length;
         added += addLines.length;
         i += 2;
@@ -89,37 +115,46 @@
 
       splitLines(part.value).forEach(function (line) {
         var esc = escapeHtml(line) || " ";
-        if (part.added) { added++; entries.push({ type: "add", html: esc }); }
-        else if (part.removed) { removed++; entries.push({ type: "del", html: esc }); }
-        else { entries.push({ type: "ctx", html: esc }); }
+        if (part.added) { added++; push("add", esc); }
+        else if (part.removed) { removed++; push("del", esc); }
+        else { push("ctx", esc); }
       });
       i++;
     }
 
-    /* Collapse long unchanged runs so changes far apart in a big document
-       aren't separated by screenfuls of identical context. */
-    var collapsed = [];
+    /* Keep only changed lines plus CONTEXT_KEEP unchanged lines around each,
+       then group the surviving runs into hunks. Overlapping context merges on
+       its own, so changes closer than 2*CONTEXT_KEEP land in one hunk — the
+       same grouping git produces. */
+    var keep = [];
+    entries.forEach(function (e, idx) {
+      if (e.type === "ctx") return;
+      var from = Math.max(0, idx - CONTEXT_KEEP);
+      var to = Math.min(entries.length - 1, idx + CONTEXT_KEEP);
+      for (var k = from; k <= to; k++) keep[k] = true;
+    });
+
+    var hunks = [];
     var j = 0;
     while (j < entries.length) {
-      if (entries[j].type !== "ctx") { collapsed.push(entries[j]); j++; continue; }
-      var runStart = j;
-      while (j < entries.length && entries[j].type === "ctx") j++;
-      var runLen = j - runStart;
-      if (runLen > CONTEXT_COLLAPSE_AT) {
-        for (var k = runStart; k < runStart + CONTEXT_KEEP; k++) collapsed.push(entries[k]);
-        collapsed.push({ type: "sep", count: runLen - 2 * CONTEXT_KEEP });
-        for (var k2 = j - CONTEXT_KEEP; k2 < j; k2++) collapsed.push(entries[k2]);
-      } else {
-        for (var k3 = runStart; k3 < j; k3++) collapsed.push(entries[k3]);
-      }
+      if (!keep[j]) { j++; continue; }
+      var start = j;
+      while (j < entries.length && keep[j]) j++;
+      hunks.push(entries.slice(start, j));
     }
 
-    var html = collapsed.map(function (e) {
-      if (e.type === "sep") return '<span class="d-sep">⋯ ข้ามบรรทัดที่เหมือนกัน ' + e.count + " บรรทัด ⋯</span>\n";
-      if (e.type === "add") return '<span class="d-add">+ ' + e.html + "</span>\n";
-      if (e.type === "del") return '<span class="d-del">- ' + e.html + "</span>\n";
-      return '<span class="d-ctx">&nbsp;&nbsp;' + e.html + "</span>\n";
-    }).join("");
+    var html = "";
+    if (hunks.length) {
+      html += '<span class="d-file">--- ต้นฉบับ (A)</span>\n<span class="d-file">+++ แก้ไข (B)</span>\n';
+      hunks.forEach(function (hunk) {
+        html += '<span class="d-hunk">' + hunkHeader(hunk) + "</span>\n";
+        hunk.forEach(function (e) {
+          if (e.type === "add") html += '<span class="d-add">+' + e.html + "</span>\n";
+          else if (e.type === "del") html += '<span class="d-del">-' + e.html + "</span>\n";
+          else html += '<span class="d-ctx"> ' + e.html + "</span>\n";
+        });
+      });
+    }
 
     return { html: html, added: added, removed: removed, unit: "บรรทัด" };
   }

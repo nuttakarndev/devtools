@@ -74,7 +74,14 @@
     if (!btn) return;
     var sel = btn.getAttribute("data-copy");
     var target = sel && $(sel);
-    if (target) window.copyText(target.value);
+    if (!target) return;
+    window.copyText(target.value);
+    /* Brief green flash on the button itself. The label is left alone so the
+       row never reflows, and the timer is per-button so rapid clicks on
+       different buttons don't cancel each other. */
+    btn.classList.add("copied");
+    clearTimeout(btn._copiedTimer);
+    btn._copiedTimer = setTimeout(function () { btn.classList.remove("copied"); }, 1000);
   });
 
   /* ---- Theme ---- */

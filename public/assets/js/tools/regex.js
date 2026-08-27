@@ -158,6 +158,15 @@
     presetsEl.value = "";
   });
 
+  panel.querySelector('[data-action="regex-clear"]').addEventListener("click", function () {
+    patternEl.value = "";
+    flagsEl.value = "g";
+    testEl.value = "";
+    replaceEl.value = "";
+    syncButtonsFromInput();
+    run();
+  });
+
   syncButtonsFromInput();
   run();
 })();
